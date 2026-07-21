@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ruhflix
+    env: static
+    buildCommand: npm config set prefix ~/.npm-global && npm install -g pnpm && export PATH=~/.npm-global/bin:$PATH && pnpm install --no-frozen-lockfile --config.dangerouslyAllowAllBuilds=true && pnpm --filter @workspace/streamvault run build
+    staticPublishPath: artifacts/streamvault/dist/public
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
