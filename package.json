@@ -15,5 +15,15 @@
   },
   "dependencies": {
     "playwright": "^1.61.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@tailwindcss/oxide",
+      "lightningcss",
+      "sharp",
+      "better-sqlite3",
+      "canvas"
+    ]
   }
 }
