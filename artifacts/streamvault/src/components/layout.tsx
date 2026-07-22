@@ -258,6 +258,34 @@ export function Layout({ children }: { children: ReactNode }) {
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
             © 2024 Ruhflix. Data from public TMDB proxy. Not affiliated with any streaming service.
           </p>
+
+          {/* Made by */}
+          <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <p style={{
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              color: "rgba(255,255,255,0.22)",
+              fontSize: 12,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}>
+              <span style={{ display: "inline-block", width: 28, height: 1, background: "rgba(255,255,255,0.15)" }} />
+              crafted with care by
+              <span style={{
+                color: "#E50914",
+                fontStyle: "italic",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                fontSize: 13,
+                textTransform: "none",
+              }}>
+                Ruhvaan
+              </span>
+              <span style={{ display: "inline-block", width: 28, height: 1, background: "rgba(255,255,255,0.15)" }} />
+            </p>
+          </div>
         </div>
       </footer>
     </div>
