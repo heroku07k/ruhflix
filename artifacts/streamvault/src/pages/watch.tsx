@@ -40,6 +40,36 @@ const SERVERS: ServerDef[] = [
     movie: (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
     tv:    (id, s, e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
+  {
+    id: "embedsu",
+    label: "Source 6",
+    movie: (id) => `https://embed.su/embed/movie/${id}`,
+    tv:    (id, s, e) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "vidsrcxyz",
+    label: "Source 7",
+    movie: (id) => `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
+    tv:    (id, s, e) => `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+  },
+  {
+    id: "autoembed",
+    label: "Source 8",
+    movie: (id) => `https://player.autoembed.cc/embed/movie/${id}`,
+    tv:    (id, s, e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "smashystream",
+    label: "Source 9",
+    movie: (id) => `https://player.smashy.stream/movie/${id}`,
+    tv:    (id, s, e) => `https://player.smashy.stream/tv/${id}?s=${s}&e=${e}`,
+  },
+  {
+    id: "multiembed",
+    label: "Source 10",
+    movie: (id) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    tv:    (id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+  },
 ];
 
 const PROBE_TIMEOUT_MS = 4000;
