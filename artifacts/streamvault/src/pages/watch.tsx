@@ -14,12 +14,12 @@ type ServerDef = {
 const SERVERS: ServerDef[] = (() => {
   const s = getServers();
   return [
-    { id:"s1", label:"Source 1",  movie:(id)=>`${s.b}/movie/${id}`,               tv:(id,se,e)=>`${s.b}/tv/${id}/${se}/${e}` },
-    { id:"s2", label:"Source 2",  movie:(id)=>`${s.c}/movie/${id}`,               tv:(id,se,e)=>`${s.c}/tv/${id}/${se}/${e}` },
-    { id:"s3", label:"Source 3",  movie:(id)=>`${s.e}/embed/${id}`,               tv:(id,se,e)=>`${s.e}/embedtv/${id}&s=${se}&e=${e}` },
-    { id:"s4", label:"Source 4",  movie:(id)=>`${s.a}/embed/movie/${id}`,         tv:(id,se,e)=>`${s.a}/embed/tv/${id}/${se}/${e}` },
-    { id:"s5", label:"Source 5",  movie:(id)=>`${s.l}/?video_id=${id}&tmdb=1`,    tv:(id,se,e)=>`${s.l}/?video_id=${id}&tmdb=1&s=${se}&e=${e}` },
-    { id:"s6", label:"Source 6",  movie:(id)=>`${s.f}/embed/movie?tmdb=${id}`,    tv:(id,se,e)=>`${s.f}/embed/tv?tmdb=${id}&season=${se}&episode=${e}` },
+    { id:"s1", label:"Source 1",  movie:(id)=>`${s.e}/embed/${id}`,               tv:(id,se,e)=>`${s.e}/embedtv/${id}&s=${se}&e=${e}` },
+    { id:"s2", label:"Source 2",  movie:(id)=>`${s.f}/embed/movie?tmdb=${id}`,    tv:(id,se,e)=>`${s.f}/embed/tv?tmdb=${id}&season=${se}&episode=${e}` },
+    { id:"s3", label:"Source 3",  movie:(id)=>`${s.b}/movie/${id}`,               tv:(id,se,e)=>`${s.b}/tv/${id}/${se}/${e}` },
+    { id:"s4", label:"Source 4",  movie:(id)=>`${s.c}/movie/${id}`,               tv:(id,se,e)=>`${s.c}/tv/${id}/${se}/${e}` },
+    { id:"s5", label:"Source 5",  movie:(id)=>`${s.a}/embed/movie/${id}`,         tv:(id,se,e)=>`${s.a}/embed/tv/${id}/${se}/${e}` },
+    { id:"s6", label:"Source 6",  movie:(id)=>`${s.l}/?video_id=${id}&tmdb=1`,    tv:(id,se,e)=>`${s.l}/?video_id=${id}&tmdb=1&s=${se}&e=${e}` },
     { id:"s7", label:"Source 7",  movie:(id)=>`${s.g}/embed/movie/${id}`,         tv:(id,se,e)=>`${s.g}/embed/tv/${id}/${se}/${e}` },
     { id:"s8", label:"Source 8",  movie:(id)=>`${s.h}/embed/movie?tmdb=${id}`,    tv:(id,se,e)=>`${s.h}/embed/tv?tmdb=${id}&season=${se}&episode=${e}` },
     { id:"s9", label:"Source 9",  movie:(id)=>`${s.j}/embed/movie/${id}`,         tv:(id,se,e)=>`${s.j}/embed/tv/${id}/${se}/${e}` },
