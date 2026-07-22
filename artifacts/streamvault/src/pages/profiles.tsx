@@ -7,11 +7,7 @@ interface Profile {
   letter: string;
 }
 
-const DEFAULT_PROFILES: Profile[] = [
-  { name: "Ruhvaan", color: "#E50914", letter: "R" },
-  { name: "Family",  color: "#2563EB", letter: "F" },
-  { name: "Kids",    color: "#16A34A", letter: "K" },
-];
+const DEFAULT_PROFILES: Profile[] = [];
 
 const PALETTE = [
   "#E50914","#f97316","#eab308","#22c55e","#14b8a6",
@@ -20,14 +16,14 @@ const PALETTE = [
 
 function loadProfiles(): Profile[] {
   try {
-    const saved = localStorage.getItem("ruhflix_profiles");
+    const saved = localStorage.getItem("ruhflix_profiles_v2");
     if (saved) return JSON.parse(saved);
   } catch {}
   return DEFAULT_PROFILES;
 }
 
 function saveProfiles(profiles: Profile[]) {
-  try { localStorage.setItem("ruhflix_profiles", JSON.stringify(profiles)); } catch {}
+  try { localStorage.setItem("ruhflix_profiles_v2", JSON.stringify(profiles)); } catch {}
 }
 
 interface ProfilesPageProps {
@@ -249,6 +245,28 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
   }
 
   /* ── Select (default) ── */
+
+  /* No profiles yet → show create prompt */
+  if (profiles.length === 0) {
+    return (
+      <div style={containerStyle}>
+        <p style={{ color: "#E50914", fontWeight: 900, fontStyle: "italic", fontSize: "clamp(1.4rem,2.5vw,2rem)", letterSpacing: "-0.03em", marginBottom: 40 }}>RUHFLIX</p>
+        <h1 style={{ color: "#fff", fontSize: "clamp(1.5rem,3vw,2.2rem)", fontWeight: 400, marginBottom: 12, letterSpacing: "-0.01em" }}>
+          Create your profile
+        </h1>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 48, textAlign: "center", maxWidth: 320 }}>
+          Choose a name and colour to get started
+        </p>
+        <button
+          onClick={openCreate}
+          style={{ background: "#E50914", color: "#fff", border: "none", padding: "14px 48px", fontSize: 15, fontWeight: 700, cursor: "pointer", borderRadius: 2, letterSpacing: "0.04em" }}
+        >
+          Create Profile
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={containerStyle}>
       <h1 style={{ color: "#fff", fontSize: "clamp(1.8rem,3.5vw,3rem)", fontWeight: 400, marginBottom: 48, letterSpacing: "-0.01em" }}>
@@ -259,7 +277,6 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
         {profiles.map((p) => (
           <button key={p.name} onClick={() => onSelect(p.name)}
             style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 0 }}
-            className="group"
           >
             <div
               style={{ width: 130, height: 130, borderRadius: 4, background: p.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 56, fontWeight: 900, color: "rgba(255,255,255,0.9)", transition: "outline 0.1s", outline: "3px solid transparent" }}
@@ -273,7 +290,7 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
         ))}
 
         {/* Add profile */}
-        <button onClick={() => { setMode("manage"); }}
+        <button onClick={openCreate}
           style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 0 }}>
           <div
             style={{ width: 130, height: 130, borderRadius: 4, background: "rgba(255,255,255,0.08)", border: "2px dashed rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 52, color: "rgba(255,255,255,0.4)", transition: "background 0.2s" }}
