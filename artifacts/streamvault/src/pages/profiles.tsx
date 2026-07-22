@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Check, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { sanitizeName, safeLocalGet, safeLocalSet, isProfileArray } from "@/lib/security";
+import { Analytics } from "@/lib/analytics";
 
 interface Profile {
   name: string;
@@ -74,6 +75,7 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
     if (profiles.length >= 10) { setError("Maximum 10 profiles allowed"); return; }
     const updated = [...profiles, { name, color: formColor, letter: name[0].toUpperCase() }];
     setProfiles(updated); saveProfiles(updated);
+    Analytics.profileCreated();
     setMode("manage");
   };
 
@@ -275,7 +277,7 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
 
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginBottom: 56 }}>
         {profiles.map((p) => (
-          <button key={p.name} onClick={() => onSelect(p.name)}
+          <button key={p.name} onClick={() => { Analytics.profileSelected(); onSelect(p.name); }}
             style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 0 }}
           >
             <div

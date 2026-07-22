@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useSearch, useLocation } from "wouter";
 import { ArrowLeft, RotateCcw, SkipForward, Wifi } from "lucide-react";
 import { getServers } from "@/lib/endpoints";
+import { Analytics } from "@/lib/analytics";
 
 type ServerDef = {
   id: string;
@@ -160,6 +161,9 @@ export default function WatchPage() {
     setLoading(true);
     startTimers();
     startBrandSplash();
+    if (serverIdx === 0) {
+      Analytics.videoStart(decodeURIComponent(title), type, params.id);
+    }
     return clearTimers;
   }, [serverIdx, probing, startTimers]);
 

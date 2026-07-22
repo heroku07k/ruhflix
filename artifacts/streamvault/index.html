@@ -27,6 +27,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ANALYTICS — replace RUHFLIX_GA_ID with your real   -->
+    <!-- Google Analytics Measurement ID (format: G-XXXXXX) -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=RUHFLIX_GA_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'RUHFLIX_GA_ID', { send_page_view: true });
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -3,13 +3,17 @@ import { Layout } from "@/components/layout";
 import { useSearch, usePopularMovies, usePopularTv } from "@/hooks/use-media";
 import { PortraitCard } from "@/components/poster-card";
 import { Search as SearchIcon } from "lucide-react";
+import { Analytics } from "@/lib/analytics";
 
 export default function Search() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(query), 400);
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+      if (query.trim().length > 1) Analytics.search(query.trim());
+    }, 400);
     return () => clearTimeout(timer);
   }, [query]);
 
