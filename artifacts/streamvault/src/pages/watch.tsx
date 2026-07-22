@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useSearch, useLocation } from "wouter";
 import { ArrowLeft, RotateCcw, SkipForward, Wifi } from "lucide-react";
+import { getServers } from "@/lib/endpoints";
 
 type ServerDef = {
   id: string;
@@ -9,68 +10,21 @@ type ServerDef = {
   tv: (id: string, s: number, e: number) => string;
 };
 
-const SERVERS: ServerDef[] = [
-  {
-    id: "vidsrcto",
-    label: "Source 1",
-    movie: (id) => `https://vidsrc.to/embed/movie/${id}`,
-    tv:    (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "vidlink",
-    label: "Source 2",
-    movie: (id) => `https://vidlink.pro/movie/${id}`,
-    tv:    (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "videasy",
-    label: "Source 3",
-    movie: (id) => `https://player.videasy.net/movie/${id}`,
-    tv:    (id, s, e) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "2embed",
-    label: "Source 4",
-    movie: (id) => `https://www.2embed.cc/embed/${id}`,
-    tv:    (id, s, e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
-  },
-  {
-    id: "vidsrcme",
-    label: "Source 5",
-    movie: (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-    tv:    (id, s, e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    id: "embedsu",
-    label: "Source 6",
-    movie: (id) => `https://embed.su/embed/movie/${id}`,
-    tv:    (id, s, e) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "vidsrcxyz",
-    label: "Source 7",
-    movie: (id) => `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-    tv:    (id, s, e) => `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    id: "autoembed",
-    label: "Source 8",
-    movie: (id) => `https://player.autoembed.cc/embed/movie/${id}`,
-    tv:    (id, s, e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "smashystream",
-    label: "Source 9",
-    movie: (id) => `https://player.smashy.stream/movie/${id}`,
-    tv:    (id, s, e) => `https://player.smashy.stream/tv/${id}?s=${s}&e=${e}`,
-  },
-  {
-    id: "multiembed",
-    label: "Source 10",
-    movie: (id) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-    tv:    (id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
-  },
-];
+const SERVERS: ServerDef[] = (() => {
+  const s = getServers();
+  return [
+    { id:"s1", label:"Source 1",  movie:(id)=>`${s.a}/embed/movie/${id}`,        tv:(id,se,e)=>`${s.a}/embed/tv/${id}/${se}/${e}` },
+    { id:"s2", label:"Source 2",  movie:(id)=>`${s.b}/movie/${id}`,               tv:(id,se,e)=>`${s.b}/tv/${id}/${se}/${e}` },
+    { id:"s3", label:"Source 3",  movie:(id)=>`${s.c}/movie/${id}`,               tv:(id,se,e)=>`${s.c}/tv/${id}/${se}/${e}` },
+    { id:"s4", label:"Source 4",  movie:(id)=>`${s.e}/embed/${id}`,               tv:(id,se,e)=>`${s.e}/embedtv/${id}&s=${se}&e=${e}` },
+    { id:"s5", label:"Source 5",  movie:(id)=>`${s.f}/embed/movie?tmdb=${id}`,    tv:(id,se,e)=>`${s.f}/embed/tv?tmdb=${id}&season=${se}&episode=${e}` },
+    { id:"s6", label:"Source 6",  movie:(id)=>`${s.g}/embed/movie/${id}`,         tv:(id,se,e)=>`${s.g}/embed/tv/${id}/${se}/${e}` },
+    { id:"s7", label:"Source 7",  movie:(id)=>`${s.h}/embed/movie?tmdb=${id}`,    tv:(id,se,e)=>`${s.h}/embed/tv?tmdb=${id}&season=${se}&episode=${e}` },
+    { id:"s8", label:"Source 8",  movie:(id)=>`${s.j}/embed/movie/${id}`,         tv:(id,se,e)=>`${s.j}/embed/tv/${id}/${se}/${e}` },
+    { id:"s9", label:"Source 9",  movie:(id)=>`${s.k}/movie/${id}`,               tv:(id,se,e)=>`${s.k}/tv/${id}?s=${se}&e=${e}` },
+    { id:"s10",label:"Source 10", movie:(id)=>`${s.l}/?video_id=${id}&tmdb=1`,    tv:(id,se,e)=>`${s.l}/?video_id=${id}&tmdb=1&s=${se}&e=${e}` },
+  ];
+})();
 
 const PROBE_TIMEOUT_MS = 4000;
 const AUTO_SWITCH_MS  = 15000;

@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Play, Tv, Smartphone, Download, Users } from "lucide-react";
+import { DATA_PATH, imgBase } from "@/lib/endpoints";
 
-const API = "https://db.wingsdatabase.com/3";
-const IMG = (p: string, w = "w342") => `https://image.tmdb.org/t/p/${w}${p}`;
+const IMG = (p: string, w = "w342") => `${imgBase()}/${w}${p}`;
 
 function useTrending() {
   return useQuery({
     queryKey: ["landing-trending"],
     queryFn: async () => {
       const [movies, tv] = await Promise.all([
-        fetch(`${API}/trending/movie/week`).then((r) => r.json()),
-        fetch(`${API}/trending/tv/week`).then((r) => r.json()),
+        fetch(`${DATA_PATH}/trending/movie/week`).then((r) => r.json()),
+        fetch(`${DATA_PATH}/trending/tv/week`).then((r) => r.json()),
       ]);
       return [...(movies.results || []), ...(tv.results || [])];
     },

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Play, Server, Languages } from "lucide-react";
+import { getServers, getRpm } from "@/lib/endpoints";
 
 export type Language = "Hindi" | "English" | "Tamil" | "Telugu" | "Malayalam" | "Kannada";
 
@@ -21,60 +22,22 @@ type ServerDef = {
   tv: (id: number, s: number, e: number) => string;
 };
 
-const RPM_BASES: Record<Language, string> = {
-  Hindi:     "https://watchout-hindi.rpmplay.me",
-  English:   "https://watchouteng.rpmvid.com",
-  Tamil:     "https://watchout-tamil.rpmvid.com",
-  Telugu:    "https://watchout-telugu.rpmvid.com",
-  Malayalam: "https://watchout-malayalam.rpmvid.com",
-  Kannada:   "https://watchout-kannada.rpmvid.com",
-};
+const SERVERS: ServerDef[] = (() => {
+  const s = getServers();
+  return [
+    { id:"v1", label:"Server 1", lang:false, movie:(id)=>`${s.j}/embed/movie/${id}`,       tv:(id,sv,e)=>`${s.j}/embed/tv/${id}/${sv}/${e}` },
+    { id:"v2", label:"Server 2", lang:false, movie:(id)=>`${s.c}/movie/${id}`,              tv:(id,sv,e)=>`${s.c}/tv/${id}/${sv}/${e}` },
+    { id:"v3", label:"Server 3", lang:false, movie:(id)=>`${s.f}/embed/movie?tmdb=${id}`,   tv:(id,sv,e)=>`${s.f}/embed/tv?tmdb=${id}&season=${sv}&episode=${e}` },
+    { id:"v4", label:"Server 4", lang:false, movie:(id)=>`${s.h}/embed/movie?tmdb=${id}`,   tv:(id,sv,e)=>`${s.h}/embed/tv?tmdb=${id}&season=${sv}&episode=${e}` },
+    { id:"v5", label:"Server 5", lang:false, movie:(id)=>`${s.e}/embed/${id}`,              tv:(id,sv,e)=>`${s.e}/embedtv/${id}&s=${sv}&e=${e}` },
+    { id:"rpm",label:"Desi", badge:"Hindi+", lang:true, movie:()=>"", tv:()=>"" },
+  ];
+})();
 
-const SERVERS: ServerDef[] = [
-  {
-    id: "autoembed",
-    label: "Server 1",
-    lang: false,
-    movie: (id) => `https://player.autoembed.cc/embed/movie/${id}`,
-    tv:    (id, s, e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "videasy",
-    label: "Server 2",
-    lang: false,
-    movie: (id) => `https://player.videasy.to/movie/${id}`,
-    tv:    (id, s, e) => `https://player.videasy.to/tv/${id}/${s}/${e}`,
-  },
-  {
-    id: "vidsrcme",
-    label: "Server 3",
-    lang: false,
-    movie: (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-    tv:    (id, s, e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    id: "vidsrcnet",
-    label: "Server 4",
-    lang: false,
-    movie: (id) => `https://vidsrc.net/embed/movie?tmdb=${id}`,
-    tv:    (id, s, e) => `https://vidsrc.net/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    id: "2embed",
-    label: "Server 5",
-    lang: false,
-    movie: (id) => `https://2embed.cc/embed/${id}`,
-    tv:    (id, s, e) => `https://2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
-  },
-  {
-    id: "rpm",
-    label: "Desi",
-    badge: "Hindi+",
-    lang: true,
-    movie: () => "",
-    tv:    () => "",
-  },
-];
+const getRpmBases = (): Record<Language, string> => {
+  const r = getRpm();
+  return { Hindi:r.hi, English:r.en, Tamil:r.ta, Telugu:r.te, Malayalam:r.ml, Kannada:r.kn };
+};
 
 const LANGUAGES: Language[] = ["Hindi", "English", "Tamil", "Telugu", "Malayalam", "Kannada"];
 
@@ -87,7 +50,7 @@ function buildUrl(
   e: number
 ): string {
   if (server.id === "rpm") {
-    const base = RPM_BASES[lang];
+    const base = getRpmBases()[lang];
     const u = new URL(base);
     u.searchParams.set("id", String(id));
     u.searchParams.set("type", type);
@@ -109,7 +72,7 @@ export function VideoPlayer({
   autoStart = false,
 }: VideoPlayerProps) {
   const [started, setStarted] = useState(autoStart);
-  const [serverId, setServerId] = useState("autoembed");
+  const [serverId, setServerId] = useState("v1");
   const [language, setLanguage] = useState<Language>("Hindi");
 
   useEffect(() => { setStarted(autoStart); }, [autoStart]);
