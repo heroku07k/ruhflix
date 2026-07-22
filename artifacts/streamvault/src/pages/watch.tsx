@@ -81,11 +81,14 @@ export default function WatchPage() {
   const seasonNum  = Number(params.season  || qs.get("s") || 1);
   const episodeNum = Number(params.episode || qs.get("e") || 1);
 
-  const [serverIdx,    setServerIdx]    = useState(0);
-  const [probing,      setProbing]      = useState(true);
-  const [loading,      setLoading]      = useState(true);
-  const [showFallback, setShowFallback] = useState(false);
-  const [switching,    setSwitching]    = useState(false);
+  const [serverIdx,      setServerIdx]      = useState(0);
+  const [probing,        setProbing]        = useState(true);
+  const [loading,        setLoading]        = useState(true);
+  const [showFallback,   setShowFallback]   = useState(false);
+  const [switching,      setSwitching]      = useState(false);
+  const [brandSplash,    setBrandSplash]    = useState(true);
+  const [brandFading,    setBrandFading]    = useState(false);
+  const brandTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const iframeRef     = useRef<HTMLIFrameElement>(null);
   const autoTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -134,6 +137,14 @@ export default function WatchPage() {
     setLoading(false);
     clearTimers();
     setShowFallback(false);
+    // Show RUHFLIX brand splash for 3.5s to cover 3rd-party player intro
+    if (brandTimer.current) clearTimeout(brandTimer.current);
+    setBrandSplash(true);
+    setBrandFading(false);
+    brandTimer.current = setTimeout(() => {
+      setBrandFading(true);
+      setTimeout(() => setBrandSplash(false), 800);
+    }, 3500);
   };
 
   const handleNextServer = () => {
@@ -383,6 +394,28 @@ export default function WatchPage() {
               <SkipForward size={13} />
               Try Next Server
             </button>
+          </div>
+        )}
+
+        {/* RUHFLIX brand splash — covers 3rd-party player intro for 3.5s */}
+        {brandSplash && !loading && !probing && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 15,
+            background: "#000",
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", gap: 8,
+            opacity: brandFading ? 0 : 1,
+            transition: "opacity 0.8s ease",
+            pointerEvents: "none",
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <span style={{ fontSize: 44, fontWeight: 900, letterSpacing: "-1px", color: "#fff" }}>
+                RUH<span style={{ color: "#E50914" }}>FLIX</span>
+              </span>
+              <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, margin: "6px 0 0", letterSpacing: 2, textTransform: "uppercase" }}>
+                Free Streaming
+              </p>
+            </div>
           </div>
         )}
 
