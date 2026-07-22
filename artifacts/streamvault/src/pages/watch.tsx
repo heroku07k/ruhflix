@@ -468,6 +468,7 @@ export default function WatchPage() {
             allowFullScreen
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             title={title || "RUHFLIX Player"}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-pointer-lock"
           />
         )}
       </div>
