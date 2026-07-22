@@ -59,8 +59,11 @@ function App() {
     setStage("profiles");
   }, []);
 
-  const handleProfileSelect = useCallback(() => {
-    try { localStorage.setItem("ruhflix_seen", "1"); } catch {}
+  const handleProfileSelect = useCallback((name: string) => {
+    try {
+      localStorage.setItem("ruhflix_seen", "1");
+      localStorage.setItem("ruhflix_active_profile", name);
+    } catch {}
     setStage("app");
   }, []);
 

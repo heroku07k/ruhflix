@@ -311,6 +311,32 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
       >
         Manage Profiles
       </button>
+
+      {/* Made by */}
+      <p style={{
+        position: "absolute",
+        bottom: 28,
+        left: 0,
+        right: 0,
+        textAlign: "center",
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        fontSize: 11,
+        letterSpacing: "0.2em",
+        color: "rgba(255,255,255,0.18)",
+        textTransform: "uppercase",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        userSelect: "none",
+      }}>
+        <span style={{ display: "inline-block", width: 22, height: 1, background: "rgba(255,255,255,0.12)" }} />
+        crafted by
+        <span style={{ color: "#E50914", fontStyle: "italic", fontWeight: 700, fontSize: 12, letterSpacing: "0.05em", textTransform: "none" }}>
+          Ruhvaan
+        </span>
+        <span style={{ display: "inline-block", width: 22, height: 1, background: "rgba(255,255,255,0.12)" }} />
+      </p>
     </div>
   );
 }

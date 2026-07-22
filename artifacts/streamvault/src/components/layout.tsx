@@ -223,15 +223,34 @@ export function Layout({ children }: { children: ReactNode }) {
               className="text-white/60 hover:text-white transition-colors cursor-pointer hidden md:block"
             />
 
-            {/* Avatar → My List */}
-            <div
-              onClick={() => navigate("/my-list")}
-              title="My Profile"
-              className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold cursor-pointer shrink-0 hover:ring-2 hover:ring-white transition-all"
-              style={{ background: "#E50914" }}
-            >
-              R
-            </div>
+            {/* Avatar → My List (shows active profile) */}
+            {(() => {
+              try {
+                const activeName = localStorage.getItem("ruhflix_active_profile") || "";
+                const profiles = JSON.parse(localStorage.getItem("ruhflix_profiles_v2") || "[]");
+                const p = profiles.find((x: any) => x.name === activeName) || profiles[0];
+                const color  = p?.color  || "#E50914";
+                const letter = p?.letter || activeName[0]?.toUpperCase() || "R";
+                return (
+                  <div
+                    onClick={() => navigate("/my-list")}
+                    title={p?.name || "My Profile"}
+                    className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold cursor-pointer shrink-0 hover:ring-2 hover:ring-white transition-all"
+                    style={{ background: color }}
+                  >
+                    {letter}
+                  </div>
+                );
+              } catch {
+                return (
+                  <div
+                    onClick={() => navigate("/my-list")}
+                    className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold cursor-pointer shrink-0 hover:ring-2 hover:ring-white transition-all"
+                    style={{ background: "#E50914" }}
+                  >R</div>
+                );
+              }
+            })()}
           </div>
         </div>
       </header>

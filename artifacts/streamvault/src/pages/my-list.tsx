@@ -109,21 +109,20 @@ function MediaGrid({
 export default function MyListPage() {
   const { myList, likedItems, toggleMyList, toggleLike } = useUserData();
 
-  const profileName = (() => {
-    try {
-      const profiles = JSON.parse(localStorage.getItem("ruhflix_profiles") || "[]");
-      return profiles[0]?.name || "My Profile";
-    } catch { return "My Profile"; }
+  const activeName = (() => {
+    try { return localStorage.getItem("ruhflix_active_profile") || ""; } catch { return ""; }
   })();
 
-  const profileColor = (() => {
+  const activeProfile = (() => {
     try {
-      const profiles = JSON.parse(localStorage.getItem("ruhflix_profiles") || "[]");
-      return profiles[0]?.color || "#E50914";
-    } catch { return "#E50914"; }
+      const profiles = JSON.parse(localStorage.getItem("ruhflix_profiles_v2") || "[]");
+      return profiles.find((p: any) => p.name === activeName) || profiles[0] || null;
+    } catch { return null; }
   })();
 
-  const profileLetter = profileName[0]?.toUpperCase() || "R";
+  const profileName   = activeProfile?.name   || activeName || "My Profile";
+  const profileColor  = activeProfile?.color  || "#E50914";
+  const profileLetter = activeProfile?.letter || profileName[0]?.toUpperCase() || "R";
 
   return (
     <Layout>
