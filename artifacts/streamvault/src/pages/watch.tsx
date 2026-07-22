@@ -117,6 +117,45 @@ export default function WatchPage() {
     return () => { document.title = "RUHFLIX"; };
   }, [title]);
 
+  // Block ad redirects from iframe without sandbox
+  useEffect(() => {
+    const origin = window.location.origin;
+
+    // Modern Chrome/Edge: Navigation API — intercepts iframe-triggered top-nav
+    const nav = (window as any).navigation;
+    if (nav) {
+      const navHandler = (event: any) => {
+        try {
+          const dest: string = event.destination?.url ?? "";
+          if (dest && !dest.startsWith(origin)) {
+            event.preventDefault();
+          }
+        } catch {}
+      };
+      nav.addEventListener("navigate", navHandler);
+      return () => nav.removeEventListener("navigate", navHandler);
+    }
+
+    // Fallback for older browsers: detect location change via polling and go back
+    const watchedHref = window.location.href;
+    const poll = setInterval(() => {
+      if (window.location.origin !== origin) {
+        window.history.back();
+      }
+    }, 300);
+    // beforeunload fallback — last resort
+    const handleUnload = (e: BeforeUnloadEvent) => {
+      const leaving = document.activeElement?.tagName !== "A";
+      if (leaving) { e.preventDefault(); e.returnValue = ""; }
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      clearInterval(poll);
+      window.removeEventListener("beforeunload", handleUnload);
+      void watchedHref;
+    };
+  }, []);
+
   const [serverIdx,      setServerIdx]      = useState(0);
   const [probing,        setProbing]        = useState(true);
   const [loading,        setLoading]        = useState(true);
@@ -468,7 +507,6 @@ export default function WatchPage() {
             allowFullScreen
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             title={title || "RUHFLIX Player"}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-pointer-lock"
           />
         )}
       </div>
