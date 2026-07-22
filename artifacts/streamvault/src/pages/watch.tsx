@@ -130,6 +130,7 @@ export default function WatchPage() {
     if (probing) return;
     setLoading(true);
     startTimers();
+    startBrandSplash();
     return clearTimers;
   }, [serverIdx, probing, startTimers]);
 
@@ -137,14 +138,16 @@ export default function WatchPage() {
     setLoading(false);
     clearTimers();
     setShowFallback(false);
-    // Show RUHFLIX brand splash for 3.5s to cover 3rd-party player intro
+  };
+
+  const startBrandSplash = () => {
     if (brandTimer.current) clearTimeout(brandTimer.current);
     setBrandSplash(true);
     setBrandFading(false);
     brandTimer.current = setTimeout(() => {
       setBrandFading(true);
       setTimeout(() => setBrandSplash(false), 800);
-    }, 3500);
+    }, 8000);
   };
 
   const handleNextServer = () => {
