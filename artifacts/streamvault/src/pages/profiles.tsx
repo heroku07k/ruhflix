@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Check, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { sanitizeName, safeLocalGet, safeLocalSet, isProfileArray } from "@/lib/security";
 
 interface Profile {
   name: string;
@@ -15,15 +16,11 @@ const PALETTE = [
 ];
 
 function loadProfiles(): Profile[] {
-  try {
-    const saved = localStorage.getItem("ruhflix_profiles_v2");
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return DEFAULT_PROFILES;
+  return safeLocalGet("ruhflix_profiles_v2", DEFAULT_PROFILES, isProfileArray);
 }
 
 function saveProfiles(profiles: Profile[]) {
-  try { localStorage.setItem("ruhflix_profiles_v2", JSON.stringify(profiles)); } catch {}
+  safeLocalSet("ruhflix_profiles_v2", profiles);
 }
 
 interface ProfilesPageProps {
@@ -68,11 +65,13 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
   };
 
   const handleSaveCreate = () => {
-    const name = formName.trim();
-    if (!name) { setError("Please enter a name"); return; }
+    const san = sanitizeName(formName);
+    if (!san.ok) { setError(san.error || "Invalid name"); return; }
+    const name = san.value;
     if (profiles.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
       setError("Profile name already exists"); return;
     }
+    if (profiles.length >= 10) { setError("Maximum 10 profiles allowed"); return; }
     const updated = [...profiles, { name, color: formColor, letter: name[0].toUpperCase() }];
     setProfiles(updated); saveProfiles(updated);
     setMode("manage");
@@ -80,8 +79,9 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
 
   const handleSaveEdit = () => {
     if (editingIdx === null) return;
-    const name = formName.trim();
-    if (!name) { setError("Please enter a name"); return; }
+    const san = sanitizeName(formName);
+    if (!san.ok) { setError(san.error || "Invalid name"); return; }
+    const name = san.value;
     if (profiles.some((p, i) => i !== editingIdx && p.name.toLowerCase() === name.toLowerCase())) {
       setError("Profile name already exists"); return;
     }

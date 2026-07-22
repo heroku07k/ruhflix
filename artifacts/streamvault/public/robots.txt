@@ -1,2 +1,7 @@
 User-agent: *
-Allow: /
+Allow: /$
+Allow: /search
+Disallow: /watch/
+Disallow: /my-list
+Disallow: /person/
+Crawl-delay: 2
