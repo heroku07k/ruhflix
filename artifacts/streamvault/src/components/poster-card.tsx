@@ -179,8 +179,7 @@ export function PortraitCard({ id, title, posterPath, voteAverage, mediaType, ye
           )}
           <div className="absolute bottom-0 left-0 right-0" style={{ height: "40%", background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)", opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }} />
         </div>
-        <p className="mt-2 text-xs font-medium" style={{ color: "rgba(255,255,255,0.7)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 150 }}>{title}</p>
-        {year && <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{String(year).substring(0, 4)}</p>}
+        <p className="mt-1.5 text-xs font-medium" style={{ color: "rgba(255,255,255,0.75)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 150 }}>{title}</p>
       </div>
     </Link>
   );

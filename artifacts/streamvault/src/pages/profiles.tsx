@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Pencil, Trash2, ArrowLeft } from "lucide-react";
 
 interface Profile {
   name: string;
@@ -34,29 +34,18 @@ interface ProfilesPageProps {
   onSelect: (name: string) => void;
 }
 
+type Mode = "select" | "manage" | "create" | "edit";
+
 export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
   const [profiles, setProfiles] = useState<Profile[]>(loadProfiles);
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState(PALETTE[0]);
-  const [error, setError] = useState("");
+  const [mode, setMode] = useState<Mode>("select");
 
-  const handleCreate = () => {
-    const name = newName.trim();
-    if (!name) { setError("Please enter a name"); return; }
-    if (profiles.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
-      setError("Profile name already exists");
-      return;
-    }
-    const letter = name[0].toUpperCase();
-    const updated = [...profiles, { name, color: newColor, letter }];
-    setProfiles(updated);
-    saveProfiles(updated);
-    setCreating(false);
-    setNewName("");
-    setNewColor(PALETTE[0]);
-    setError("");
-  };
+  // Create / Edit form state
+  const [formName, setFormName] = useState("");
+  const [formColor, setFormColor] = useState(PALETTE[0]);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   const containerStyle: React.CSSProperties = {
     minHeight: "100vh",
@@ -69,78 +58,134 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
     padding: "40px 20px",
   };
 
-  if (creating) {
+  const openCreate = () => {
+    setFormName(""); setFormColor(PALETTE[0]); setError("");
+    setMode("create");
+  };
+
+  const openEdit = (idx: number) => {
+    setFormName(profiles[idx].name);
+    setFormColor(profiles[idx].color);
+    setEditingIdx(idx);
+    setError("");
+    setMode("edit");
+  };
+
+  const handleSaveCreate = () => {
+    const name = formName.trim();
+    if (!name) { setError("Please enter a name"); return; }
+    if (profiles.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+      setError("Profile name already exists"); return;
+    }
+    const updated = [...profiles, { name, color: formColor, letter: name[0].toUpperCase() }];
+    setProfiles(updated); saveProfiles(updated);
+    setMode("manage");
+  };
+
+  const handleSaveEdit = () => {
+    if (editingIdx === null) return;
+    const name = formName.trim();
+    if (!name) { setError("Please enter a name"); return; }
+    if (profiles.some((p, i) => i !== editingIdx && p.name.toLowerCase() === name.toLowerCase())) {
+      setError("Profile name already exists"); return;
+    }
+    const updated = profiles.map((p, i) =>
+      i === editingIdx ? { name, color: formColor, letter: name[0].toUpperCase() } : p
+    );
+    setProfiles(updated); saveProfiles(updated);
+    setMode("manage");
+  };
+
+  const handleDelete = (idx: number) => {
+    const updated = profiles.filter((_, i) => i !== idx);
+    setProfiles(updated); saveProfiles(updated);
+    setDeleteConfirm(null);
+  };
+
+  /* ── Form (Create or Edit) ── */
+  if (mode === "create" || mode === "edit") {
+    const isEdit = mode === "edit";
     return (
       <div style={containerStyle}>
-        <h1 style={{ color: "#fff", fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 400, marginBottom: 40 }}>
-          Create Profile
+        <button
+          onClick={() => setMode(isEdit ? "manage" : "manage")}
+          style={{ position: "absolute", top: 24, left: 24, background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+
+        <h1 style={{ color: "#fff", fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 400, marginBottom: 32 }}>
+          {isEdit ? "Edit Profile" : "Create Profile"}
         </h1>
 
         {/* Avatar preview */}
-        <div
-          style={{ width: 100, height: 100, borderRadius: 4, background: newColor, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, fontWeight: 900, color: "rgba(255,255,255,0.9)", marginBottom: 28, transition: "background 0.2s" }}
-        >
-          {newName ? newName[0].toUpperCase() : "?"}
+        <div style={{ width: 100, height: 100, borderRadius: 4, background: formColor, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, fontWeight: 900, color: "rgba(255,255,255,0.9)", marginBottom: 24, transition: "background 0.2s" }}>
+          {formName ? formName[0].toUpperCase() : "?"}
         </div>
 
         {/* Name input */}
         <input
           autoFocus
-          value={newName}
-          onChange={(e) => { setNewName(e.target.value); setError(""); }}
-          onKeyDown={(e) => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") setCreating(false); }}
+          value={formName}
+          onChange={(e) => { setFormName(e.target.value); setError(""); }}
+          onKeyDown={(e) => { if (e.key === "Enter") isEdit ? handleSaveEdit() : handleSaveCreate(); if (e.key === "Escape") setMode("manage"); }}
           placeholder="Profile name"
           maxLength={20}
           style={{
-            width: "min(340px, 90vw)",
-            padding: "12px 16px",
-            background: "#454545",
-            border: error ? "1px solid #E50914" : "1px solid transparent",
-            color: "#fff",
-            fontSize: "1rem",
-            borderRadius: 4,
-            outline: "none",
-            marginBottom: 6,
+            width: "min(340px, 90vw)", padding: "12px 16px",
+            background: "#454545", border: error ? "1px solid #E50914" : "1px solid transparent",
+            color: "#fff", fontSize: "1rem", borderRadius: 4, outline: "none", marginBottom: 6,
           }}
         />
-        {error && <p style={{ color: "#E50914", fontSize: 12, marginBottom: 12 }}>{error}</p>}
+        {error && <p style={{ color: "#E50914", fontSize: 12, marginBottom: 8 }}>{error}</p>}
 
         {/* Color picker */}
-        <div style={{ marginTop: 20, marginBottom: 32 }}>
-          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, marginBottom: 12, textAlign: "center", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Pick a colour
-          </p>
+        <div style={{ marginTop: 16, marginBottom: 28 }}>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginBottom: 10, textAlign: "center", textTransform: "uppercase", letterSpacing: "0.08em" }}>Pick a colour</p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
             {PALETTE.map((c) => (
-              <button
-                key={c}
-                onClick={() => setNewColor(c)}
-                style={{
-                  width: 32, height: 32, borderRadius: 4, background: c, border: "none", cursor: "pointer",
-                  outline: newColor === c ? "3px solid #fff" : "none",
-                  outlineOffset: 2,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "outline 0.1s",
-                }}
+              <button key={c} onClick={() => setFormColor(c)}
+                style={{ width: 32, height: 32, borderRadius: 4, background: c, border: "none", cursor: "pointer", outline: formColor === c ? "3px solid #fff" : "none", outlineOffset: 2, display: "flex", alignItems: "center", justifyContent: "center", transition: "outline 0.1s" }}
               >
-                {newColor === c && <Check size={16} color="#fff" strokeWidth={3} />}
+                {formColor === c && <Check size={16} color="#fff" strokeWidth={3} />}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Buttons */}
+        {/* Delete option (edit only) */}
+        {isEdit && editingIdx !== null && (
+          <div style={{ marginBottom: 20 }}>
+            {deleteConfirm === editingIdx ? (
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginBottom: 12 }}>Delete this profile?</p>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                  <button onClick={() => { handleDelete(editingIdx); setMode("manage"); }}
+                    style={{ background: "#E50914", color: "#fff", border: "none", padding: "8px 24px", fontSize: 13, fontWeight: 700, cursor: "pointer", borderRadius: 2 }}>
+                    Delete
+                  </button>
+                  <button onClick={() => setDeleteConfirm(null)}
+                    style={{ background: "transparent", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.25)", padding: "8px 24px", fontSize: 13, cursor: "pointer", borderRadius: 2 }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setDeleteConfirm(editingIdx)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+                <Trash2 size={14} /> Delete Profile
+              </button>
+            )}
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 12 }}>
-          <button
-            onClick={handleCreate}
-            style={{ background: "#fff", color: "#000", border: "none", padding: "10px 32px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer", borderRadius: 2 }}
-          >
+          <button onClick={isEdit ? handleSaveEdit : handleSaveCreate}
+            style={{ background: "#fff", color: "#000", border: "none", padding: "10px 32px", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer", borderRadius: 2 }}>
             Save
           </button>
-          <button
-            onClick={() => { setCreating(false); setError(""); setNewName(""); }}
-            style={{ background: "transparent", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.3)", padding: "10px 32px", fontSize: "0.9rem", cursor: "pointer", borderRadius: 2 }}
-          >
+          <button onClick={() => { setMode("manage"); setError(""); }}
+            style={{ background: "transparent", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.3)", padding: "10px 32px", fontSize: "0.9rem", cursor: "pointer", borderRadius: 2 }}>
             Cancel
           </button>
         </div>
@@ -148,6 +193,62 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
     );
   }
 
+  /* ── Manage mode ── */
+  if (mode === "manage") {
+    return (
+      <div style={containerStyle}>
+        <button
+          onClick={() => setMode("select")}
+          style={{ position: "absolute", top: 24, left: 24, background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+
+        <h1 style={{ color: "#fff", fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 400, marginBottom: 48 }}>
+          Manage Profiles
+        </h1>
+
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginBottom: 40 }}>
+          {profiles.map((p, idx) => (
+            <div key={p.name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+              <div style={{ position: "relative" }}>
+                <div style={{ width: 130, height: 130, borderRadius: 4, background: p.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 56, fontWeight: 900, color: "rgba(255,255,255,0.9)", opacity: 0.85 }}>
+                  {p.letter}
+                </div>
+                {/* Edit button overlay */}
+                <button
+                  onClick={() => openEdit(idx)}
+                  style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", borderRadius: 4, border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, color: "#fff" }}
+                >
+                  <Pencil size={22} />
+                  <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.04em" }}>EDIT</span>
+                </button>
+              </div>
+              <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, fontWeight: 500 }}>{p.name}</span>
+            </div>
+          ))}
+
+          {/* Add profile */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <button onClick={openCreate}
+              style={{ width: 130, height: 130, borderRadius: 4, background: "rgba(255,255,255,0.08)", border: "2px dashed rgba(255,255,255,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 40, color: "rgba(255,255,255,0.4)", cursor: "pointer" }}>
+              +
+            </button>
+            <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 14 }}>Add Profile</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setMode("select")}
+          style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.5)", padding: "10px 36px", fontSize: 14, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}
+        >
+          Done
+        </button>
+      </div>
+    );
+  }
+
+  /* ── Select (default) ── */
   return (
     <div style={containerStyle}>
       <h1 style={{ color: "#fff", fontSize: "clamp(1.8rem,3.5vw,3rem)", fontWeight: 400, marginBottom: 48, letterSpacing: "-0.01em" }}>
@@ -156,9 +257,7 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
 
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginBottom: 56 }}>
         {profiles.map((p) => (
-          <button
-            key={p.name}
-            onClick={() => onSelect(p.name)}
+          <button key={p.name} onClick={() => onSelect(p.name)}
             style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 0 }}
             className="group"
           >
@@ -169,15 +268,13 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
             >
               {p.letter}
             </div>
-            <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, fontWeight: 500, letterSpacing: "0.01em" }}>{p.name}</span>
+            <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, fontWeight: 500 }}>{p.name}</span>
           </button>
         ))}
 
         {/* Add profile */}
-        <button
-          onClick={() => setCreating(true)}
-          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 0 }}
-        >
+        <button onClick={() => { setMode("manage"); }}
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 0 }}>
           <div
             style={{ width: 130, height: 130, borderRadius: 4, background: "rgba(255,255,255,0.08)", border: "2px dashed rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 52, color: "rgba(255,255,255,0.4)", transition: "background 0.2s" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.13)"; }}
@@ -193,7 +290,7 @@ export default function ProfilesPage({ onSelect }: ProfilesPageProps) {
         style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.5)", padding: "10px 36px", fontSize: 14, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#fff"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.3)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"; }}
-        onClick={() => onSelect("Guest")}
+        onClick={() => setMode("manage")}
       >
         Manage Profiles
       </button>

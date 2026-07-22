@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { useMovie } from "@/hooks/use-media";
 import { getImageUrl } from "@/lib/api";
@@ -15,6 +15,7 @@ export default function MovieDetail() {
   const id = params.id as string;
   const { data: movie, isLoading } = useMovie(id);
   const { toggleMyList, toggleLike, isInMyList, isLiked } = useUserData();
+  const [, navigate] = useLocation();
 
   if (isLoading) return <Layout><DetailSkeleton /></Layout>;
   if (!movie) return <Layout><div className="p-20 text-center text-white/40">Movie not found</div></Layout>;
@@ -26,7 +27,7 @@ export default function MovieDetail() {
 
   const handlePlay = () => {
     const title = encodeURIComponent(movie.title || "");
-    window.open(`${BASE}/watch/movie/${movie.id}?type=movie&title=${title}`, "_blank");
+    navigate(`/watch/movie/${movie.id}?type=movie&title=${title}`);
   };
 
   const handleToggleList = () => toggleMyList({

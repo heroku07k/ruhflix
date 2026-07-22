@@ -1,12 +1,14 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Bell, X, ChevronDown } from "lucide-react";
+import { Search, Bell, X, ChevronDown, Home, Film, Tv, TrendingUp } from "lucide-react";
 
 export function Layout({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQ, setSearchQ] = useState("");
+  const [browseOpen, setBrowseOpen] = useState(false);
   const [location, navigate] = useLocation();
+  const browseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -19,6 +21,16 @@ export function Layout({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (browseRef.current && !browseRef.current.contains(e.target as Node)) {
+        setBrowseOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQ.trim()) {
@@ -29,14 +41,62 @@ export function Layout({ children }: { children: ReactNode }) {
   };
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/search?type=movie", label: "Movies" },
-    { href: "/search?type=tv", label: "TV Shows" },
-    { href: "/search", label: "New & Popular" },
+    { href: "/", label: "Home", icon: <Home size={15} /> },
+    { href: "/search?type=movie", label: "Movies", icon: <Film size={15} /> },
+    { href: "/search?type=tv", label: "TV Shows", icon: <Tv size={15} /> },
+    { href: "/search", label: "New & Popular", icon: <TrendingUp size={15} /> },
   ];
 
   return (
     <div className="min-h-screen" style={{ background: "#141414", color: "#fff" }}>
+      {/* Mobile full-screen search overlay */}
+      {searchOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-[200] flex flex-col"
+          style={{ background: "rgba(20,20,20,0.98)", backdropFilter: "blur(6px)" }}
+        >
+          <form
+            onSubmit={submitSearch}
+            className="flex items-center gap-3"
+            style={{ padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <Search size={18} className="text-white/50 shrink-0" />
+            <input
+              autoFocus
+              value={searchQ}
+              onChange={(e) => setSearchQ(e.target.value)}
+              placeholder="Search movies, shows, people..."
+              className="flex-1 bg-transparent text-white text-base outline-none placeholder:text-white/35"
+              style={{ fontSize: 16 }}
+            />
+            <button
+              type="button"
+              onClick={() => { setSearchOpen(false); setSearchQ(""); }}
+              className="text-white/50 text-sm font-medium px-2 py-1"
+            >
+              Cancel
+            </button>
+          </form>
+          {/* Quick links when no query */}
+          {!searchQ && (
+            <div style={{ padding: "20px 16px" }}>
+              <p className="text-white/30 text-xs font-semibold uppercase tracking-widest mb-4">Browse</p>
+              {navLinks.map((link) => (
+                <button
+                  key={link.href}
+                  onClick={() => { navigate(link.href); setSearchOpen(false); }}
+                  className="flex items-center gap-3 w-full text-left py-3"
+                  style={{ color: "rgba(255,255,255,0.75)", fontSize: 15, background: "none", border: "none", cursor: "pointer" }}
+                >
+                  <span className="text-white/40">{link.icon}</span>
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Navbar */}
       <header
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-400"
@@ -87,18 +147,48 @@ export function Layout({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          {/* Mobile browse */}
-          <div className="md:hidden flex items-center gap-1 flex-1 text-sm">
-            <span className="text-white/60 text-xs font-medium">Browse</span>
-            <ChevronDown size={11} className="text-white/60" />
+          {/* Mobile browse dropdown */}
+          <div className="md:hidden flex items-center flex-1 min-w-0" ref={browseRef}>
+            <button
+              onClick={() => setBrowseOpen((o) => !o)}
+              className="flex items-center gap-1"
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
+              <span className="text-white/70 text-sm font-medium">Browse</span>
+              <ChevronDown
+                size={13}
+                className="text-white/50 transition-transform"
+                style={{ transform: browseOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              />
+            </button>
+
+            {browseOpen && (
+              <div
+                className="absolute top-[60px] left-0 right-0 z-[100]"
+                style={{ background: "rgba(20,20,20,0.98)", backdropFilter: "blur(6px)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+              >
+                {navLinks.map((link) => (
+                  <button
+                    key={link.href}
+                    onClick={() => { navigate(link.href); setBrowseOpen(false); }}
+                    className="flex items-center gap-3 w-full text-left"
+                    style={{ padding: "14px 20px", color: "rgba(255,255,255,0.78)", fontSize: 14, background: "none", border: "none", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                  >
+                    <span className="text-white/40">{link.icon}</span>
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-4 ml-auto shrink-0">
+            {/* Desktop search */}
             {searchOpen ? (
               <form
                 onSubmit={submitSearch}
-                className="flex items-center gap-2 border border-white/50 bg-black/95"
+                className="hidden md:flex items-center gap-2 border border-white/50 bg-black/95"
                 style={{ padding: "5px 12px" }}
               >
                 <Search size={13} className="text-white/40 shrink-0" />
@@ -118,14 +208,15 @@ export function Layout({ children }: { children: ReactNode }) {
                   <X size={13} />
                 </button>
               </form>
-            ) : (
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="text-white/70 hover:text-white transition-colors"
-              >
-                <Search size={19} />
-              </button>
-            )}
+            ) : null}
+
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="text-white/70 hover:text-white transition-colors"
+              style={{ display: searchOpen ? "none" : undefined }}
+            >
+              <Search size={19} />
+            </button>
 
             <Bell
               size={19}

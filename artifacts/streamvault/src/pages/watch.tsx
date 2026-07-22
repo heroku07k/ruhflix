@@ -111,6 +111,12 @@ export default function WatchPage() {
   const seasonNum  = Number(params.season  || qs.get("s") || 1);
   const episodeNum = Number(params.episode || qs.get("e") || 1);
 
+  useEffect(() => {
+    const decoded = decodeURIComponent(title);
+    if (decoded) document.title = `${decoded} | RUHFLIX`;
+    return () => { document.title = "RUHFLIX"; };
+  }, [title]);
+
   const [serverIdx,      setServerIdx]      = useState(0);
   const [probing,        setProbing]        = useState(true);
   const [loading,        setLoading]        = useState(true);

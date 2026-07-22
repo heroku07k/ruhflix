@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { useTv, useTvSeason } from "@/hooks/use-media";
 import { getImageUrl } from "@/lib/api";
@@ -16,6 +16,7 @@ export default function TvDetail() {
   const id = params.id as string;
   const { data: tv, isLoading } = useTv(id);
   const { toggleMyList, toggleLike, isInMyList, isLiked } = useUserData();
+  const [, navigate] = useLocation();
 
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const { data: seasonData, isLoading: seasonLoading } = useTvSeason(id, selectedSeason);
@@ -38,7 +39,7 @@ export default function TvDetail() {
 
   const openWatch = (epNum: number) => {
     const title = encodeURIComponent(tv.name || "");
-    window.open(`${BASE}/watch/tv/${tv.id}/${selectedSeason}/${epNum}?type=tv&title=${title}&s=${selectedSeason}&e=${epNum}`, "_blank");
+    navigate(`/watch/tv/${tv.id}/${selectedSeason}/${epNum}?type=tv&title=${title}&s=${selectedSeason}&e=${epNum}`);
   };
 
   const handleToggleList = () => toggleMyList({
